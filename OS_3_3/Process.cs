@@ -60,6 +60,14 @@ namespace OS_3_3
             }
         }
 
+        public bool IsSuspended     // TODO
+        {
+            get
+            {
+                return _handle != IntPtr.Zero;
+            }
+        }
+
         public Process(string commandLine)
         {
             _commandLine = commandLine;
