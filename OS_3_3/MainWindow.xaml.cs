@@ -25,7 +25,7 @@ namespace OS_3_3
             InitializeComponent();
         }
 
-        private void CreateProcess_Click(object sender, RoutedEventArgs e)
+        private void CreateProcessButton_Click(object sender, RoutedEventArgs e)
         {
 
         }
