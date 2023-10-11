@@ -39,6 +39,35 @@ namespace OS_3_3
             }
         }
 
+        public string AffinityMask
+        {
+            get
+            {
+                ulong mask = GetAffinityMask();
+
+                StringBuilder builder = new StringBuilder();
+
+                for (int i = 0; i < 64; i++)
+                {
+                    if ((mask & (1ul << i)) != 0)
+                    {
+                        builder.Append(i);
+                        builder.Append(' ');
+                    }
+                }
+
+                return builder.ToString();
+            }
+        }
+
+        public bool IsSuspended     // TODO
+        {
+            get
+            {
+                return _handle != IntPtr.Zero;
+            }
+        }
+
         public Process(string commandLine)
         {
             _commandLine = commandLine;

@@ -13,7 +13,18 @@
         </Grid.ColumnDefinitions>
 
         <DataGrid Grid.Row="0" Grid.Column="0" IsReadOnly="True" x:Name="ProcessInfGrid">
+            <DataGrid.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Header="Suspend" Click="SuspendMenuItem_Click"/>
+                    <MenuItem Header="Resume" Click="ResumeMenuItem_Click"/>
+                    <MenuItem Header="Terminate" Click="TerminateMenuItem_Click"/>
+                    <Separator/>
+                    <MenuItem Header="Set Priority" Click="SetPriorityMenuItem_Click"/>
+                    <MenuItem Header="Set Affinity" Click="SetAffinityMenuItem_Click"/>
+                </ContextMenu>
+            </DataGrid.ContextMenu>
         </DataGrid>
+
 
         <Grid Grid.Row="0" Grid.Column="1">
             <Grid.RowDefinitions>
