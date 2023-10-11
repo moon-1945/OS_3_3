@@ -16,7 +16,7 @@ namespace OS_3_3
         public const uint INFINITY = 0xFFFFFFFF;
         public const uint MAX_PATH = 260;
         public const uint TH32CS_SNAPPROCESS = 0x00000002;
-        public const int INVALID_HANDLE_VALUE = -1;
+        public const int INVALID_HANDLE_VALUE = -1; 
 
 
         [DllImport("kernel32.dll", SetLastError = true)]
@@ -34,7 +34,7 @@ namespace OS_3_3
                out PROCESS_INFORMATION lpProcessInformation);
 
         [DllImport("kernel32.dll", SetLastError = true)]
-        [return: MarshalAs(UnmanagedType.Bool)]
+        [return: MarshalAs(UnmanagedType.Bool)]    
         public static extern bool CloseHandle(IntPtr hObject);
 
         [DllImport("kernel32.dll", SetLastError = true)]
@@ -87,6 +87,14 @@ namespace OS_3_3
 
         [DllImport("kernel32.dll", SetLastError = true)]
         public static extern bool TerminateProcess(IntPtr hProcess, uint uExitCode);
+
+        [DllImport("kernel32.dll")]
+        public static extern int GetProcessTimes(IntPtr hProcess, out FILETIME lpCreationTime, out FILETIME lpExitTime, out FILETIME lpKernelTime, out FILETIME lpUserTime);
+
+        // Import the FileTimeToSystemTime function from kernel32.dll
+        [DllImport("kernel32.dll")]
+        public static extern bool FileTimeToSystemTime(ref FILETIME lpFileTime, out SYSTEMTIME lpSystemTime);
+
 
         [StructLayout(LayoutKind.Sequential)]
         public struct STARTUPINFO
@@ -146,6 +154,26 @@ namespace OS_3_3
             public uint dwFlags;
             [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 260)]
             public string szExeFile;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        public struct FILETIME
+        {
+            public uint dwLowDateTime;
+            public uint dwHighDateTime;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        public struct SYSTEMTIME
+        {
+            public ushort wYear;
+            public ushort wMonth;
+            public ushort wDayOfWeek;
+            public ushort wDay;
+            public ushort wHour;
+            public ushort wMinute;
+            public ushort wSecond;
+            public ushort wMilliseconds;
         }
 
     }

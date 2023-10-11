@@ -327,5 +327,43 @@ namespace OS_3_3
                 Kill(ids[i]);
             }
         }
+
+        public void GetTimes(
+       out DateTime creationTime,
+       out DateTime exitTime,
+       out TimeSpan kernelTime,
+       out TimeSpan userTime)
+        {
+            GetProcessTimes(_handle,
+                out FILETIME fileCreatingTime,
+                out FILETIME fileExitTime,
+                out FILETIME fileKernelTime,
+                out FILETIME fileUserTime);
+
+            FileTimeToSystemTime(ref fileCreatingTime, out SYSTEMTIME systemCreatingTime);
+            FileTimeToSystemTime(ref fileExitTime, out SYSTEMTIME systemExitTime);
+
+            creationTime = new DateTime(
+                systemCreatingTime.wYear,
+                systemCreatingTime.wMonth,
+                systemCreatingTime.wDay,
+                systemCreatingTime.wHour,
+                systemCreatingTime.wMinute,
+                systemCreatingTime.wSecond,
+                systemCreatingTime.wMilliseconds);
+
+            exitTime = new DateTime(
+                systemExitTime.wYear,
+                systemExitTime.wMonth,
+                systemExitTime.wDay,
+                systemExitTime.wHour,
+                systemExitTime.wMinute,
+                systemExitTime.wSecond,
+                systemExitTime.wMilliseconds);
+
+            kernelTime = new TimeSpan(fileKernelTime.dwHighDateTime * 4294967296 + fileKernelTime.dwLowDateTime);
+            userTime = new TimeSpan(fileUserTime.dwHighDateTime * 4294967296 + fileUserTime.dwLowDateTime);
+
+        }
     }
 }
