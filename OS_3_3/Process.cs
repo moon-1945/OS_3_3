@@ -60,13 +60,7 @@ namespace OS_3_3
             }
         }
 
-        public bool IsSuspended     // TODO
-        {
-            get
-            {
-                return _handle != IntPtr.Zero;
-            }
-        }
+        public bool IsTerminated => (WaitForSingleObject(_handle,0) == 0) ? true : false;
 
         public Process(string commandLine)
         {
