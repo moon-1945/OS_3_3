@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -24,22 +25,32 @@ namespace OS_3_3
     {
         const int TIMEOUT = 100;
         private readonly List<Process> processes = new(4);
+        bool isUpdateThreadRunning = true;
         public MainWindow()
         {
             InitializeComponent();
             ProcessInfGrid.ItemsSource = processes;
-            new Thread(new ThreadStart( () =>
+            Closing += OnClosingWindow;
+
+            new Thread(new ThreadStart(() =>
             {
-                while (true)
+                while (isUpdateThreadRunning)
                 {
-                    if(!this.IsVisible) // if window is not visible, then stop updating
+                    if (this.IsVisible) // Перевірка видимості вікна
+                    {
                         Dispatcher.Invoke(() =>
                         {
                             ProcessInfGrid.Items.Refresh();
                         });
+                    }
                     Thread.Sleep(TIMEOUT);
                 }
             })).Start();
+        }
+
+        private void OnClosingWindow(object? sender, CancelEventArgs e)
+        {
+            isUpdateThreadRunning = false;
         }
 
         private void CreateProcessButton_Click(object sender, RoutedEventArgs e)
@@ -53,5 +64,40 @@ namespace OS_3_3
             else if (TabulationRadioButton.IsChecked.HasValue)
                 processes.Add(Process.Start("tabulation.exe")!);//TODO : put tabl.exe in executing directory
         }
+        private void SuspendMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            
+            if (ProcessInfGrid.SelectedItem is Process selectedProcess)
+            {
+                selectedProcess.Suspend();
+            }
+        }
+
+        private void ResumeMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            if (ProcessInfGrid.SelectedItem is Process selectedProcess)
+            {
+                selectedProcess.Resume();
+            }
+        }
+
+        private void TerminateMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            if (ProcessInfGrid.SelectedItem is Process selectedProcess)
+            {
+                selectedProcess.Kill();
+            }
+        }
+
+        private void SetPriorityMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            throw new NotImplementedException();
+        }
+
+        private void SetAffinityMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            throw new NotImplementedException();
+        }
+
     }
 }
