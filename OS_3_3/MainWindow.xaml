@@ -29,8 +29,8 @@
                     <RowDefinition/>
                 </Grid.RowDefinitions>
                 <RadioButton Grid.Row="0" Grid.Column="0"  Content="Tabulation" x:Name="TabulationRadioButton"/>
-                <RadioButton Grid.Row="1" Grid.Column="0"  Content="Space" x:Name="NotepadRadioButton"/>
-                <RadioButton Grid.Row="2" Grid.Column="0"  Content="Ping" x:Name="PingRadioButton"/>
+                <RadioButton Grid.Row="1" Grid.Column="0"  Content="Proteus" x:Name="ProteusRadioButton"/>
+                <RadioButton Grid.Row="2" Grid.Column="0"  Content="Tracert" x:Name="TracertRadioButton"/>
                 <RadioButton Grid.Row="3" Grid.Column="0" Content="Search" x:Name="SearchRadioButton"/>
             </Grid>
         </Grid>
