@@ -12,6 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using OS_3_3;
 
 namespace OS_3_3
 {
@@ -20,14 +21,23 @@ namespace OS_3_3
     /// </summary>
     public partial class MainWindow : Window
     {
+        List<Process> processes = new(4);
         public MainWindow()
         {
             InitializeComponent();
+            ProcessInfGrid.ItemsSource = processes;
         }
 
         private void CreateProcessButton_Click(object sender, RoutedEventArgs e)
         {
-
+            if (NotepadRadioButton.IsChecked!.Value)
+                processes.Add( Process.Start("notepad.exe")!);
+            else if (PingRadioButton.IsChecked!.Value)
+                processes.Add(Process.Start("ping")!);//TODO: Set command
+            else if (SearchRadioButton.IsChecked!.Value)
+                processes.Add(Process.Start("search.exe")!);//TODO: Create Search aloritm
+            else if (TabulationRadioButton.IsChecked.HasValue)
+                processes.Add(Process.Start("tabulation.exe")!);//TODO : put tabl.exe in executing directory
         }
     }
 }
