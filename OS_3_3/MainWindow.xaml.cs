@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -24,24 +25,32 @@ namespace OS_3_3
     {
         const int TIMEOUT = 100;
         private readonly List<Process> processes = new(4);
+        bool isUpdateThreadRunning = true;
         public MainWindow()
         {
             InitializeComponent();
             ProcessInfGrid.ItemsSource = processes;
-            new Thread(new ThreadStart( () =>
+            Closing += OnClosingWindow;
+
+            new Thread(new ThreadStart(() =>
             {
-                while (true)
+                while (isUpdateThreadRunning)
                 {
-                    if(this.IsVisible) // if window is not visible, then stop updating
+                    if (this.IsVisible) // Перевірка видимості вікна
+                    {
                         Dispatcher.Invoke(() =>
                         {
                             ProcessInfGrid.Items.Refresh();
                         });
-                    else
-                        
+                    }
                     Thread.Sleep(TIMEOUT);
                 }
             })).Start();
+        }
+
+        private void OnClosingWindow(object? sender, CancelEventArgs e)
+        {
+            isUpdateThreadRunning = false;
         }
 
         private void CreateProcessButton_Click(object sender, RoutedEventArgs e)
