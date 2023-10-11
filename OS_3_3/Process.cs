@@ -22,6 +22,23 @@ namespace OS_3_3
 
         public string Name { get; private set; }
 
+        public string Priority
+        {
+            get
+            {
+                return GetPriority() switch
+                {
+                    ProcessPriorityClass.ABOVE_NORMAL => "Above Normal",//TODO
+                    ProcessPriorityClass.BELOW_NORMAL => "Below Normal",
+                    ProcessPriorityClass.HIGH => "High",
+                    ProcessPriorityClass.IDLE => "Idle",
+                    ProcessPriorityClass.NORMAL => "Normal",
+                    ProcessPriorityClass.REALTIME => "Realtime",
+                    _ => throw new NotImplementedException(),
+                };
+            }
+        }
+
         public Process(string commandLine)
         {
             _commandLine = commandLine;
