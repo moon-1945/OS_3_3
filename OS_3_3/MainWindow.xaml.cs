@@ -32,7 +32,7 @@ namespace OS_3_3
             {
                 while (true)
                 {
-                    if(!this.IsVisible) // if window is not visible, then stop updating
+                    if(this.IsVisible) // if window is not visible, then stop updating
                         Dispatcher.Invoke(() =>
                         {
                             ProcessInfGrid.Items.Refresh();
