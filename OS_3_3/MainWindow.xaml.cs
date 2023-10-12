@@ -54,6 +54,10 @@ namespace OS_3_3
         private void OnClosingWindow(object? sender, CancelEventArgs e)
         {
             isUpdateThreadRunning = false;
+            foreach (var process in processes)
+            {
+                process.Dispose();
+            }
         }
 
         private void CreateProcessButton_Click(object sender, RoutedEventArgs e)

@@ -64,6 +64,10 @@ namespace OS_3_3
                 
                 IsUpdateThreadRunning = false;
 
+                foreach (var process in processes)
+                {
+                    process.Dispose();
+                }
                 // TODO: освободить неуправляемые ресурсы (неуправляемые объекты) и переопределить метод завершения
                 // TODO: установить значение NULL для больших полей
                 disposedValue = true;

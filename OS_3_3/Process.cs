@@ -11,9 +11,9 @@ using static OS_3_3.WindowsApi;
 
 
 
-namespace OS_3_3
+namespace OS_3_3 
 {
-    public class Process
+    public class Process: IDisposable
     {
         private string? _commandLine = null;
         private IntPtr _handle = IntPtr.Zero;
@@ -56,6 +56,7 @@ namespace OS_3_3
         //}
 
 
+        
         public ProcessPriorityClass Priority
         {
             get
@@ -91,39 +92,40 @@ namespace OS_3_3
         }
         public bool IsTerminated => (WaitForSingleObject(_handle, 0) == 0) ? true : false;
 
-        //private int _num = 0;
+        private int _num = 0;
 
-        //private uint _mainThreadId = 0;
+        private uint _mainThreadId = 0;
+        private bool disposedValue;
 
-        //public bool IsSuspended
-        //{
-        //    get
-        //    {
-        //        uint id = 0;
-        //        if (_num == 0)
-        //        {
-        //            id = GetMainThreadId();
-        //            _mainThreadId = id;
-        //        }
-        //        else
-        //        {
-        //            id = _mainThreadId;
-        //        }
+        public bool IsSuspended
+        {
+            get
+            {
+                uint id = 0;
+                if (_num == 0)
+                {
+                    id = GetMainThreadId();
+                    _mainThreadId = id;
+                }
+                else
+                {
+                    id = _mainThreadId;
+                }
 
-        //        if (id == 0) return false;
+                if (id == 0) return false;
 
-        //        IntPtr handle = OpenThread(ThreadAccessFlags.ALL_ACCESS, false, id);
+                IntPtr handle = OpenThread(ThreadAccessFlags.ALL_ACCESS, false, id);
 
-        //        if (ResumeThread(handle) > 0)
-        //        {
-        //            SuspendThread(handle);
+                if (ResumeThread(handle) > 0)
+                {
+                    SuspendThread(handle);
 
-        //            return true;
-        //        }
+                    return true;
+                }
 
-        //        return false;
-        //    }
-        //}
+                return false;
+            }
+        }
 
         //public bool IsRunning
         //{
@@ -431,7 +433,7 @@ namespace OS_3_3
 
         public void Kill()
         {
-            TerminateProcess(_handle, 9);
+            TerminateProcess(_handle, 1);
             //close handle???
         }
 
@@ -562,6 +564,35 @@ namespace OS_3_3
         public void UpdateInfo()
         {
             throw new NotImplementedException();
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                    // TODO: освободить управляемое состояние (управляемые объекты)
+                }
+                Kill();
+                // TODO: освободить неуправляемые ресурсы (неуправляемые объекты) и переопределить метод завершения
+                // TODO: установить значение NULL для больших полей
+                disposedValue = true;
+            }
+        }
+
+        // TODO: переопределить метод завершения, только если "Dispose(bool disposing)" содержит код для освобождения неуправляемых ресурсов
+        ~Process()
+        {
+            // Не изменяйте этот код. Разместите код очистки в методе "Dispose(bool disposing)".
+            Dispose(disposing: false);
+        }
+
+        public void Dispose()
+        {
+            // Не изменяйте этот код. Разместите код очистки в методе "Dispose(bool disposing)".
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
         }
     }
 }
