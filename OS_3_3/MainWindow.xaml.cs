@@ -89,10 +89,61 @@ namespace OS_3_3
             }
         }
 
+        private void Realtime_Click(object sender, RoutedEventArgs e)
+        {
+            if (ProcessInfGrid.SelectedItem is Process selectedProcess)
+            {
+                selectedProcess.Priority = ProcessPriorityClass.REALTIME;
+            }
+        }
+
+        private void High_Click(object sender, RoutedEventArgs e)
+        {
+            if (ProcessInfGrid.SelectedItem is Process selectedProcess)
+            {
+                selectedProcess.Priority = ProcessPriorityClass.HIGH;
+            }
+        }
+
+        private void AboveNormal_Click(object sender, RoutedEventArgs e)
+        {
+            if (ProcessInfGrid.SelectedItem is Process selectedProcess)
+            {
+                selectedProcess.Priority = ProcessPriorityClass.ABOVE_NORMAL;
+            }
+        }
+
+        private void Normal_Click(object sender, RoutedEventArgs e)
+        {
+            if (ProcessInfGrid.SelectedItem is Process selectedProcess)
+            {
+                selectedProcess.Priority = ProcessPriorityClass.NORMAL;
+            }
+        }
+
+        private void BelowNormal_Click(object sender, RoutedEventArgs e)
+        {
+            if (ProcessInfGrid.SelectedItem is Process selectedProcess)
+            {
+                selectedProcess.Priority = ProcessPriorityClass.BELOW_NORMAL;
+            }
+        }
+
+        private void Idle_Click(object sender, RoutedEventArgs e)
+        {
+            if (ProcessInfGrid.SelectedItem is Process selectedProcess)
+            {
+                selectedProcess.Priority = ProcessPriorityClass.IDLE;
+            }
+        }
+
+
         private void SetPriorityMenuItem_Click(object sender, RoutedEventArgs e)
         {
-            throw new NotImplementedException();
+    
         }
+
+
 
         private void SetAffinityMenuItem_Click(object sender, RoutedEventArgs e)
         {

@@ -19,7 +19,14 @@
                     <MenuItem Header="Resume" Click="ResumeMenuItem_Click"/>
                     <MenuItem Header="Terminate" Click="TerminateMenuItem_Click"/>
                     <Separator/>
-                    <MenuItem Header="Set Priority" Click="SetPriorityMenuItem_Click"/>
+                    <MenuItem Header="Set Priority" Click="SetPriorityMenuItem_Click">
+                        <MenuItem Header="Realtime" Click="Realtime_Click"/>
+                        <MenuItem Header="High" Click="High_Click"/>
+                        <MenuItem Header="Above normal" Click="AboveNormal_Click"/>
+                        <MenuItem Header="Normal" Click="Normal_Click"/>
+                        <MenuItem Header="Below normal" Click="BelowNormal_Click"/>
+                        <MenuItem Header="Idle" Click="Idle_Click"/>
+                    </MenuItem>
                     <MenuItem Header="Set Affinity" Click="SetAffinityMenuItem_Click"/>
                 </ContextMenu>
             </DataGrid.ContextMenu>
