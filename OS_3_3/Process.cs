@@ -433,5 +433,10 @@ namespace OS_3_3
             userTime = new TimeSpan(fileUserTime.dwHighDateTime * 4294967296 + fileUserTime.dwLowDateTime);
 
         }
+
+        internal void UpdateInfo()
+        {
+            throw new NotImplementedException();
+        }
     }
 }
