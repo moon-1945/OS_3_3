@@ -27,7 +27,9 @@
                         <MenuItem Header="Below normal" Click="BelowNormal_Click"/>
                         <MenuItem Header="Idle" Click="Idle_Click"/>
                     </MenuItem>
-                    <MenuItem Header="Set Affinity" Click="SetAffinityMenuItem_Click"/>
+                    <MenuItem Header="Set Affinity" Click="SetAffinityMenuItem_Click" x:Name="AffinityMenuItem">
+                        
+                    </MenuItem>
                 </ContextMenu>
             </DataGrid.ContextMenu>
         </DataGrid>

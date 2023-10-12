@@ -48,6 +48,8 @@ namespace OS_3_3
             })).Start();
         }
 
+    
+
         private void OnClosingWindow(object? sender, CancelEventArgs e)
         {
             isUpdateThreadRunning = false;
@@ -56,7 +58,7 @@ namespace OS_3_3
         private void CreateProcessButton_Click(object sender, RoutedEventArgs e)
         {
             if (NotepadRadioButton.IsChecked!.Value)
-                processes.Add( Process.Start("notepad.exe")!);
+                processes.Add(Process.Start("notepad.exe")!);
             else if (PingRadioButton.IsChecked!.Value)
                 processes.Add(Process.Start("ping")!);//TODO: Set command
             else if (SearchRadioButton.IsChecked!.Value)
@@ -66,7 +68,7 @@ namespace OS_3_3
         }
         private void SuspendMenuItem_Click(object sender, RoutedEventArgs e)
         {
-            
+
             if (ProcessInfGrid.SelectedItem is Process selectedProcess)
             {
                 selectedProcess.Suspend();
@@ -140,14 +142,21 @@ namespace OS_3_3
 
         private void SetPriorityMenuItem_Click(object sender, RoutedEventArgs e)
         {
-    
+
         }
 
 
 
         private void SetAffinityMenuItem_Click(object sender, RoutedEventArgs e)
         {
-            throw new NotImplementedException();
+            if (!(ProcessInfGrid.SelectedItem is Process selectedProcess)) throw new Exception();
+            
+            Processor_affinity affinityWindow = new Processor_affinity()
+            {
+                Process = selectedProcess,
+            };
+            
+            affinityWindow.ShowDialog();
         }
 
     }

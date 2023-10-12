@@ -95,6 +95,8 @@ namespace OS_3_3
         [DllImport("kernel32.dll")]
         public static extern bool FileTimeToSystemTime(ref FILETIME lpFileTime, out SYSTEMTIME lpSystemTime);
 
+        [DllImport("kernel32.dll")]
+        public static extern void GetSystemInfo(out SYSTEM_INFO lpSystemInfo);
 
         [StructLayout(LayoutKind.Sequential)]
         public struct STARTUPINFO
@@ -174,6 +176,21 @@ namespace OS_3_3
             public ushort wMinute;
             public ushort wSecond;
             public ushort wMilliseconds;
+        }
+        [StructLayout(LayoutKind.Sequential)]
+        public struct SYSTEM_INFO
+        {
+            public ushort wProcessorArchitecture;
+            public ushort wReserved;
+            public uint dwPageSize;
+            public IntPtr lpMinimumApplicationAddress;
+            public IntPtr lpMaximumApplicationAddress;
+            public IntPtr dwActiveProcessorMask;
+            public uint dwNumberOfProcessors;
+            public uint dwProcessorType;
+            public uint dwAllocationGranularity;
+            public ushort wProcessorLevel;
+            public ushort wProcessorRevision;
         }
 
     }
