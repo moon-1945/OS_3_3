@@ -27,6 +27,8 @@ namespace OS_3_3
         {
             InitializeComponent();
 
+            upLabel.Text = $"Which processors are alowed to run \"{Process.Name}\"";
+
             _coresNumber = GetCoresNumber();
 
             ulong affinityMask = Process.GetAffinityMask();

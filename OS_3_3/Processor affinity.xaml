@@ -13,7 +13,7 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <TextBlock Grid.Row="0" Grid.Column="0" Text="Which processors are alowed to run"/>
+        <TextBlock x:Name="upLabel" Grid.Row="0" Grid.Column="0" FontSize="10" Margin="5,0,0,0" VerticalAlignment="Center"/>
 
         <ListBox x:Name="kernelsCheck" Grid.Row="1" Grid.Column="0" >
         </ListBox>
