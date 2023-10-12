@@ -91,12 +91,17 @@ namespace OS_3_3
         [DllImport("kernel32.dll")]
         public static extern int GetProcessTimes(IntPtr hProcess, out FILETIME lpCreationTime, out FILETIME lpExitTime, out FILETIME lpKernelTime, out FILETIME lpUserTime);
 
-        // Import the FileTimeToSystemTime function from kernel32.dll
+        [DllImport("kernel32.dll")]
+        public static extern bool GetThreadTimes(IntPtr hThread, out FILETIME lpCreationTime, out FILETIME lpExitTime, out FILETIME lpKernelTime, out FILETIME lpUserTime);
+
         [DllImport("kernel32.dll")]
         public static extern bool FileTimeToSystemTime(ref FILETIME lpFileTime, out SYSTEMTIME lpSystemTime);
 
         [DllImport("kernel32.dll")]
         public static extern void GetSystemInfo(out SYSTEM_INFO lpSystemInfo);
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        public static extern bool GetExitCodeProcess(IntPtr hProcess, out uint lpExitCode);
 
         [StructLayout(LayoutKind.Sequential)]
         public struct STARTUPINFO

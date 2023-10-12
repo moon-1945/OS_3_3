@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -16,6 +17,7 @@ namespace OS_3_3
     {
         private string? _commandLine = null;
         private IntPtr _handle = IntPtr.Zero;
+
         //    private IntPtr _threadHandle; //???
 
         public uint Id { get; private set; }
@@ -87,8 +89,63 @@ namespace OS_3_3
                 return builder.ToString();
             }
         }
+        public bool IsTerminated => (WaitForSingleObject(_handle, 0) == 0) ? true : false;
 
-        public bool IsTerminated => (WaitForSingleObject(_handle,0) == 0) ? true : false;
+        //private int _num = 0;
+
+        //private uint _mainThreadId = 0;
+
+        //public bool IsSuspended
+        //{
+        //    get
+        //    {
+        //        uint id = 0;
+        //        if (_num == 0)
+        //        {
+        //            id = GetMainThreadId();
+        //            _mainThreadId = id;
+        //        }
+        //        else
+        //        {
+        //            id = _mainThreadId;
+        //        }
+
+        //        if (id == 0) return false;
+
+        //        IntPtr handle = OpenThread(ThreadAccessFlags.ALL_ACCESS, false, id);
+
+        //        if (ResumeThread(handle) > 0)
+        //        {
+        //            SuspendThread(handle);
+
+        //            return true;
+        //        }
+
+        //        return false;
+        //    }
+        //}
+
+        //public bool IsRunning
+        //{
+        //    get
+        //    {
+        //        if (!GetExitCodeProcess(_handle, out uint code)) throw new InvalidOperationException();
+
+        //        if (IsSuspended) return false; // незн без цього не працює норм ...
+
+        //        return code == 259;
+        //    }
+        //}
+
+        //public string Status
+        //{
+        //    get
+        //    {
+        //        if (IsTerminated) return "Terminated";
+        //        if (IsSuspended) return "Suspended";
+        //        return "Running";
+        //    }
+        //}
 
         public Process(string commandLine)
         {
@@ -147,7 +204,6 @@ namespace OS_3_3
 
         public void Close()
         {
-            WaitToEnd();
             CloseHandle(_handle);
         }
 
@@ -301,6 +357,8 @@ namespace OS_3_3
 
         public void Suspend()
         {
+          //  if (IsSuspended) return;
+
             uint[] threadIds = GetThreadIDs();
 
             for (int i = 0; i < threadIds.Length; i++)
@@ -434,9 +492,78 @@ namespace OS_3_3
 
         }
 
-        internal void UpdateInfo()
+
+        public static void GetThreadTimesById(
+          uint id,
+          out DateTime creationTime,
+          out DateTime exitTime,
+          out TimeSpan kernelTime,
+          out TimeSpan userTime)
+        {
+            IntPtr handle = OpenThread(ThreadAccessFlags.ALL_ACCESS, false, id);
+
+            GetProcessTimes(handle,
+                out FILETIME fileCreatingTime,
+                out FILETIME fileExitTime,
+                out FILETIME fileKernelTime,
+                out FILETIME fileUserTime);
+
+            FileTimeToSystemTime(ref fileCreatingTime, out SYSTEMTIME systemCreatingTime);
+            FileTimeToSystemTime(ref fileExitTime, out SYSTEMTIME systemExitTime);
+
+            creationTime = new DateTime(
+                systemCreatingTime.wYear,
+                systemCreatingTime.wMonth,
+                systemCreatingTime.wDay,
+                systemCreatingTime.wHour,
+                systemCreatingTime.wMinute,
+                systemCreatingTime.wSecond,
+                systemCreatingTime.wMilliseconds);
+
+            exitTime = new DateTime(
+                systemExitTime.wYear,
+                systemExitTime.wMonth,
+                systemExitTime.wDay,
+                systemExitTime.wHour,
+                systemExitTime.wMinute,
+                systemExitTime.wSecond,
+                systemExitTime.wMilliseconds);
+
+            kernelTime = new TimeSpan((long)fileKernelTime.dwHighDateTime * (long)4294967296 + (long)fileKernelTime.dwLowDateTime);
+            userTime = new TimeSpan((long)fileUserTime.dwHighDateTime * (long)4294967296 + (long)fileUserTime.dwLowDateTime);
+
+        }
+
+        public uint GetMainThreadId()
+        {
+            uint[] ids = GetThreadIDs();
+
+            if (ids.Length == 0) return 0;
+
+            uint minId = ids[0];
+
+            GetThreadTimesById(ids[0], out DateTime minCreationTime, out _, out _, out _);
+
+            for (int i = 1; i < ids.Length; i++)
+            {
+                GetThreadTimesById(ids[i], out DateTime creationTime, out _, out _, out _);
+
+                if (creationTime < minCreationTime)
+                {
+                    minCreationTime = creationTime;
+                    minId = ids[i];
+                }
+
+            }
+
+            return minId;
+        }
+
+        public void UpdateInfo()
         {
             throw new NotImplementedException();
         }
     }
 }
+
+

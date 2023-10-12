@@ -39,6 +39,8 @@ namespace OS_3_3
                 {
                     if (this.IsVisible) // Перевірка видимості вікна
                     {
+                   //     processes.RemoveAll((e) => e.IsTerminated);
+
                         Dispatcher.Invoke(() =>
                         {
                             ProcessInfGrid.Items.Refresh();
@@ -48,8 +50,6 @@ namespace OS_3_3
                 }
             })).Start();
         }
-
-    
 
         private void OnClosingWindow(object? sender, CancelEventArgs e)
         {
