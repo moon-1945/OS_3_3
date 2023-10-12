@@ -29,6 +29,8 @@ namespace OS_3_3
 
             _coresNumber = GetCoresNumber();
 
+            ulong affinityMask = Process.GetAffinityMask();
+
             kernelsCheck.Items.Clear();
 
             CheckBox allCheck = new CheckBox()
@@ -46,13 +48,14 @@ namespace OS_3_3
                 CheckBox affinityCheck = new CheckBox()
                 {
                     Content = $"CPU {i}",
+                    IsChecked = ((affinityMask >> i) % 2 == 0) ? false : true,
                 };
 
                 kernelsCheck.Items.Add(affinityCheck);
             }
         }
 
-        private uint GetCoresNumber()
+        private uint GetCoresNumber() // я не впевнеений що це має бути у цьому класі ... 
         {
             GetSystemInfo(out SYSTEM_INFO systemInfo);
 
