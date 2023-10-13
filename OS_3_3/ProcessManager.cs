@@ -2,8 +2,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
-using System.Linq;
-using System.Text;
 using System.Threading;
 
 namespace OS_3_3
@@ -40,17 +38,8 @@ namespace OS_3_3
         {
             while(IsUpdateThreadRunning)
             {
-                GetUpdatedProcessInfo();
                 System.Windows.Application.Current.Dispatcher.Invoke(() => CollectionChanged?.Invoke(this, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset)));
                 Thread.Sleep(UPDATE_TIMEOUT);
-            }
-        }
-
-        private void GetUpdatedProcessInfo()
-        {
-            foreach (var process in processes)
-            {
-                process.UpdateInfo();
             }
         }
 

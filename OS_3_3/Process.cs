@@ -1,12 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
-using System.Threading.Tasks;
 using static OS_3_3.WindowsApi;
 
 
@@ -15,7 +11,7 @@ namespace OS_3_3
 {
     public class Process: IDisposable
     {
-        private string? _commandLine = null;
+        private readonly string _commandLine;
         private IntPtr _handle = IntPtr.Zero;
 
         //    private IntPtr _threadHandle; //???
@@ -61,9 +57,9 @@ namespace OS_3_3
                 return builder.ToString();
             }
         }
-        private bool IsTerminated => (WaitForSingleObject(_handle, 0) == 0) ? true : false;
+        private bool IsTerminated => (WaitForSingleObject(_handle, 0) == 0);
 
-        private int _num = 0;
+        private readonly int _num = 0;
 
         private uint _mainThreadId = 0;
         private bool disposedValue;
@@ -98,17 +94,7 @@ namespace OS_3_3
             }
         }
 
-        private bool IsRunning
-        {
-            get
-            {
-                if (!GetExitCodeProcess(_handle, out uint code)) throw new InvalidOperationException();
-
-                if (IsSuspended) return false; // незн без цього не працює норм ...
-
-                return code == 259;
-            }
-        }
+       
 
         public string Status
         {
@@ -120,20 +106,13 @@ namespace OS_3_3
             }
         }
 
-        public Process(string commandLine)
-        {
-            _commandLine = commandLine;
-        }
+        public Process(string commandLine) => _commandLine = commandLine;
 
         public bool Start()
         {
-            if (_commandLine == null)
-            {
-                throw new Exception("Process haven't info");
-            }
+           
 
             STARTUPINFO startupInfo = new STARTUPINFO();
-            PROCESS_INFORMATION processInfo = new PROCESS_INFORMATION();
 
             startupInfo.cb = 104;
 
@@ -146,7 +125,7 @@ namespace OS_3_3
             IntPtr.Zero,
             null,
             ref startupInfo,
-            out processInfo);
+            out PROCESS_INFORMATION processInfo);
 
             _handle = processInfo.hProcess;
 
@@ -265,7 +244,7 @@ namespace OS_3_3
         {
             if (!GetProcessAffinityMask(_handle, out UIntPtr processAffinityMask, out UIntPtr systemAffinityMask))
             {
-                throw new Exception();
+                throw new InvalidOperationException("Cound not get afifnity mask");
             }
 
             return processAffinityMask.ToUInt64();
@@ -502,8 +481,8 @@ namespace OS_3_3
                 systemExitTime.wSecond,
                 systemExitTime.wMilliseconds);
 
-            kernelTime = new TimeSpan((long)fileKernelTime.dwHighDateTime * (long)4294967296 + (long)fileKernelTime.dwLowDateTime);
-            userTime = new TimeSpan((long)fileUserTime.dwHighDateTime * (long)4294967296 + (long)fileUserTime.dwLowDateTime);
+            kernelTime = new TimeSpan(fileKernelTime.dwHighDateTime * 4294967296L + fileKernelTime.dwLowDateTime);
+            userTime = new TimeSpan(fileUserTime.dwHighDateTime * 4294967296L + fileUserTime.dwLowDateTime);
 
         }
 
@@ -532,36 +511,23 @@ namespace OS_3_3
             return minId;
         }
 
-        public void UpdateInfo()
-        {
-            //throw new NotImplementedException();
-        }
-
         protected virtual void Dispose(bool disposing)
         {
             if (!disposedValue)
             {
-                if (disposing)
-                {
-                    // TODO: освободить управляемое состояние (управляемые объекты)
-                }
                 Kill();
-                // TODO: освободить неуправляемые ресурсы (неуправляемые объекты) и переопределить метод завершения
-                // TODO: установить значение NULL для больших полей
+                CloseHandle(_handle);
                 disposedValue = true;
             }
         }
 
-        // TODO: переопределить метод завершения, только если "Dispose(bool disposing)" содержит код для освобождения неуправляемых ресурсов
         ~Process()
         {
-            // Не изменяйте этот код. Разместите код очистки в методе "Dispose(bool disposing)".
             Dispose(disposing: false);
         }
 
         public void Dispose()
         {
-            // Не изменяйте этот код. Разместите код очистки в методе "Dispose(bool disposing)".
             Dispose(disposing: true);
             GC.SuppressFinalize(this);
         }
