@@ -1,21 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
-using System.Threading.Tasks;
 using static OS_3_3.WindowsApi;
 
-
+#pragma warning disable S6562
+#pragma warning disable CS8618
 
 namespace OS_3_3 
 {
     public class Process: IDisposable
     {
-        private string? _commandLine = null;
+        private readonly string _commandLine;
         private IntPtr _handle = IntPtr.Zero;
 
         //    private IntPtr _threadHandle; //???
@@ -47,7 +44,7 @@ namespace OS_3_3
             {
                 ulong mask = GetAffinityMask();
 
-                StringBuilder builder = new StringBuilder();
+                StringBuilder builder = new ();
 
                 for (int i = 0; i < 64; i++)
                 {
@@ -61,9 +58,9 @@ namespace OS_3_3
                 return builder.ToString();
             }
         }
-        private bool IsTerminated => (WaitForSingleObject(_handle, 0) == 0) ? true : false;
+        private bool IsTerminated => (WaitForSingleObject(_handle, 0) == 0);
 
-        private int _num = 0;
+        private readonly int _num = 0;
 
         private uint _mainThreadId = 0;
         private bool disposedValue;
@@ -72,7 +69,7 @@ namespace OS_3_3
         {
             get
             {
-                uint id = 0;
+                uint id;
                 if (_num == 0)
                 {
                     id = GetMainThreadId();
@@ -89,7 +86,7 @@ namespace OS_3_3
 
                 if (ResumeThread(handle) > 0)
                 {
-                    SuspendThread(handle);
+                    _ = SuspendThread(handle);
 
                     return true;
                 }
@@ -98,15 +95,29 @@ namespace OS_3_3
             }
         }
 
-        private bool IsRunning
+       public TimeSpan TimeFromCreation
         {
             get
             {
-                if (!GetExitCodeProcess(_handle, out uint code)) throw new InvalidOperationException();
-
-                if (IsSuspended) return false; // незн без цього не працює норм ...
-
-                return code == 259;
+               
+                GetTimes(out DateTime creationTime, out _, out _, out _);
+                return DateTime.UtcNow.TimeOfDay - creationTime.TimeOfDay;
+            }
+        }
+        public double UserTime
+        {
+            get
+            {
+                GetTimes(out _, out _, out _, out TimeSpan userTime);
+                return userTime.TotalSeconds;
+            }
+        }
+        public double KernelTime
+        {
+            get
+            {
+                GetTimes(out _, out _, out TimeSpan kernelTime, out _);
+                return kernelTime.TotalSeconds;
             }
         }
 
@@ -120,22 +131,16 @@ namespace OS_3_3
             }
         }
 
-        public Process(string commandLine)
-        {
-            _commandLine = commandLine;
-        }
+        public Process(string commandLine) => _commandLine = commandLine;
 
         public bool Start()
         {
-            if (_commandLine == null)
+
+
+            STARTUPINFO startupInfo = new()
             {
-                throw new Exception("Process haven't info");
-            }
-
-            STARTUPINFO startupInfo = new STARTUPINFO();
-            PROCESS_INFORMATION processInfo = new PROCESS_INFORMATION();
-
-            startupInfo.cb = 104;
+                cb = 104
+            };
 
             bool isSuccessful = CreateProcess(null,
             _commandLine,
@@ -146,7 +151,7 @@ namespace OS_3_3
             IntPtr.Zero,
             null,
             ref startupInfo,
-            out processInfo);
+            out PROCESS_INFORMATION processInfo);
 
             _handle = processInfo.hProcess;
 
@@ -154,42 +159,32 @@ namespace OS_3_3
 
             CloseHandle(processInfo.hThread);
 
-            StringBuilder lpFileName = new StringBuilder((int)MAX_PATH); // 260 - MAX_PATH
+            StringBuilder lpFileName = new ((int)MAX_PATH); // 260 - MAX_PATH
 
-            K32GetModuleFileNameExW(_handle, IntPtr.Zero, lpFileName, MAX_PATH);
+            _ =K32GetModuleFileNameExW(_handle, IntPtr.Zero, lpFileName, MAX_PATH);
 
             Name = Path.GetFileName(lpFileName.ToString());
 
             return isSuccessful;
         }
 
-        public static Process? Start(string commandLine)
-        {
-            var process = new Process(commandLine);
-
-            return process.Start() ? process : null;
-        }
-
         public void WaitToEnd()
         {
-            WaitForSingleObject(_handle, INFINITY);
-        }
-
-        public void Close()
-        {
-            CloseHandle(_handle);
+            _ = WaitForSingleObject(_handle, INFINITY);
         }
 
         private uint[] GetThreadIDs()
         {
-            List<uint> ids = new List<uint>();
+            List<uint> ids = new();
 
             IntPtr hThreadSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPTHREAD, 0);
 
             if (hThreadSnapshot != IntPtr.Zero)
             {
-                THREADENTRY32 threadEntry = new THREADENTRY32();
-                threadEntry.dwSize = (uint)Marshal.SizeOf(typeof(THREADENTRY32));
+                THREADENTRY32 threadEntry = new()
+                {
+                    dwSize = (uint)Marshal.SizeOf(typeof(THREADENTRY32))
+                };
 
                 if (Thread32First(hThreadSnapshot, ref threadEntry))
                 {
@@ -212,89 +207,46 @@ namespace OS_3_3
             return ids.ToArray();
         }
 
-        public static uint[] GetProcessesIdByName(string name)
-        {
-            List<uint> ids = new List<uint>();
-
-            PROCESSENTRY32 entry = new PROCESSENTRY32();
-            entry.dwSize = (uint)Marshal.SizeOf(typeof(PROCESSENTRY32));
-
-            IntPtr snapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
-
-            if (Process32First(snapshot, ref entry))
-            {
-                do
-                {
-                    if (Path.GetFileName(entry.szExeFile) == name || entry.szExeFile == name)
-                    {
-                        ids.Add(entry.th32ProcessID);
-                    }
-                } while (Process32Next(snapshot, ref entry));
-            }
-
-            CloseHandle(snapshot);
-
-            return ids.ToArray();
-        }
-
-
         public static Process? GetProcessById(uint id)
         {
             IntPtr handle = OpenProcess(ProcessAccessFlags.ALL_ACCESS, false, id);
 
             if (handle == IntPtr.Zero) return null;
 
-            StringBuilder lpFileName = new StringBuilder(260); // 260 - MAX_PATH
+            StringBuilder lpFileName = new (260); // 260 - MAX_PATH
 
-            K32GetModuleFileNameExW(handle, IntPtr.Zero, lpFileName, 260);
+            _=K32GetModuleFileNameExW(handle, IntPtr.Zero, lpFileName, 260);
 
             string path = lpFileName.ToString();
 
-            Process? process = new Process(path)
+            Process? process = new(path)
             {
                 Name = Path.GetFileName(path),
                 Id = id,
+                _handle = handle
             };
-
-            process._handle = handle;
 
             return process;
         }
 
         public ulong GetAffinityMask()
         {
-            if (!GetProcessAffinityMask(_handle, out UIntPtr processAffinityMask, out UIntPtr systemAffinityMask))
+            if (!GetProcessAffinityMask(_handle, out UIntPtr processAffinityMask, out _))
             {
-                throw new Exception();
+                throw new InvalidOperationException("Cound not get afifnity mask");
             }
 
             return processAffinityMask.ToUInt64();
         }
 
-        public static ulong GetAffinityMask(uint id)
-        {
-            Process? process = GetProcessById(id);
 
-            if (process == null) throw new Exception();
-
-            return process.GetAffinityMask();
-        }
 
         public void SetAffinityMask(ulong affinityMask)
         {
             if (!SetProcessAffinityMask(_handle, new UIntPtr(affinityMask)))
             {
-                throw new Exception();
+                throw new InvalidOperationException("Cound not set afifnity mask");
             }
-        }
-
-        public static void SetAffinityMask(uint id, ulong affinityMask)
-        {
-            Process? process = GetProcessById(id);
-
-            if (process == null) throw new Exception();
-
-            process.SetAffinityMask(affinityMask);
         }
 
         public ProcessPriorityClass GetPriority()
@@ -302,30 +254,12 @@ namespace OS_3_3
             return GetPriorityClass(_handle);
         }
 
-        public static ProcessPriorityClass GetPriority(uint id)
-        {
-            Process? process = GetProcessById(id);
-
-            if (process == null) throw new Exception();
-
-            return process.GetPriority();
-        }
-
         public void SetPriority(ProcessPriorityClass priorityClass)
         {
             if (!SetPriorityClass(_handle, priorityClass))
             {
-                throw new Exception();
+                throw new InvalidOperationException("Cound set a priority");
             }
-        }
-
-        public static void SetPriority(uint id, ProcessPriorityClass priorityClass)
-        {
-            Process? process = GetProcessById(id);
-
-            if (process == null) throw new Exception();
-
-            process.SetPriority(priorityClass);
         }
 
         public void Suspend()
@@ -340,29 +274,10 @@ namespace OS_3_3
 
                 if (handle != IntPtr.Zero)
                 {
-                    SuspendThread(handle);
+                    _ = SuspendThread(handle);
                 }
 
                 CloseHandle(handle);
-            }
-        }
-
-        public static void Suspend(uint id)
-        {
-            Process? process = GetProcessById(id);
-
-            if (process == null) throw new Exception();
-
-            process.Suspend();
-        }
-
-        public static void Suspend(string name)
-        {
-            uint[] ids = GetProcessesIdByName(name);
-
-            for (int i = 0; i < ids.Length; i++)
-            {
-                Suspend(ids[i]);
             }
         }
 
@@ -376,29 +291,10 @@ namespace OS_3_3
 
                 if (handle != IntPtr.Zero)
                 {
-                    ResumeThread(handle);
+                    _ = ResumeThread(handle);
                 }
 
                 CloseHandle(handle);
-            }
-        }
-
-        public static void Resume(uint id)
-        {
-            Process? process = GetProcessById(id);
-
-            if (process == null) throw new Exception();
-
-            process.Resume();
-        }
-
-        public static void Resume(string name)
-        {
-            uint[] ids = GetProcessesIdByName(name);
-
-            for (int i = 0; i < ids.Length; i++)
-            {
-                Resume(ids[i]);
             }
         }
 
@@ -410,21 +306,8 @@ namespace OS_3_3
 
         public static void Kill(uint id)
         {
-            Process? process = GetProcessById(id);
-
-            if (process == null) throw new Exception();
-
+            Process? process = GetProcessById(id)!;
             process.Kill();
-        }
-
-        public static void Kill(string name)
-        {
-            uint[] ids = GetProcessesIdByName(name);
-
-            for (int i = 0; i < ids.Length; i++)
-            {
-                Kill(ids[i]);
-            }
         }
 
         public void GetTimes(
@@ -433,7 +316,7 @@ namespace OS_3_3
        out TimeSpan kernelTime,
        out TimeSpan userTime)
         {
-            GetProcessTimes(_handle,
+            _ = GetProcessTimes(_handle,
                 out FILETIME fileCreatingTime,
                 out FILETIME fileExitTime,
                 out FILETIME fileKernelTime,
@@ -475,7 +358,7 @@ namespace OS_3_3
         {
             IntPtr handle = OpenThread(ThreadAccessFlags.ALL_ACCESS, false, id);
 
-            GetProcessTimes(handle,
+            _ = GetProcessTimes(handle,
                 out FILETIME fileCreatingTime,
                 out FILETIME fileExitTime,
                 out FILETIME fileKernelTime,
@@ -502,8 +385,8 @@ namespace OS_3_3
                 systemExitTime.wSecond,
                 systemExitTime.wMilliseconds);
 
-            kernelTime = new TimeSpan((long)fileKernelTime.dwHighDateTime * (long)4294967296 + (long)fileKernelTime.dwLowDateTime);
-            userTime = new TimeSpan((long)fileUserTime.dwHighDateTime * (long)4294967296 + (long)fileUserTime.dwLowDateTime);
+            kernelTime = new TimeSpan(fileKernelTime.dwHighDateTime * 4294967296L + fileKernelTime.dwLowDateTime);
+            userTime = new TimeSpan(fileUserTime.dwHighDateTime * 4294967296L + fileUserTime.dwLowDateTime);
 
         }
 
@@ -532,36 +415,23 @@ namespace OS_3_3
             return minId;
         }
 
-        public void UpdateInfo()
-        {
-            //throw new NotImplementedException();
-        }
-
         protected virtual void Dispose(bool disposing)
         {
             if (!disposedValue)
             {
-                if (disposing)
-                {
-                    // TODO: освободить управляемое состояние (управляемые объекты)
-                }
                 Kill();
-                // TODO: освободить неуправляемые ресурсы (неуправляемые объекты) и переопределить метод завершения
-                // TODO: установить значение NULL для больших полей
+                CloseHandle(_handle);
                 disposedValue = true;
             }
         }
 
-        // TODO: переопределить метод завершения, только если "Dispose(bool disposing)" содержит код для освобождения неуправляемых ресурсов
         ~Process()
         {
-            // Не изменяйте этот код. Разместите код очистки в методе "Dispose(bool disposing)".
             Dispose(disposing: false);
         }
 
         public void Dispose()
         {
-            // Не изменяйте этот код. Разместите код очистки в методе "Dispose(bool disposing)".
             Dispose(disposing: true);
             GC.SuppressFinalize(this);
         }

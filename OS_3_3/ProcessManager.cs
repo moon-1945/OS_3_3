@@ -2,8 +2,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
-using System.Linq;
-using System.Text;
 using System.Threading;
 
 namespace OS_3_3
@@ -19,8 +17,8 @@ namespace OS_3_3
 
         public ProcessManager() 
         {
-            ThreadStart threadStart = new ThreadStart(UpDatingThread);
-            Thread thread = new Thread(threadStart);
+            ThreadStart threadStart = new (UpDatingThread);
+            Thread thread = new (threadStart);
             thread.Start();
         }
 
@@ -31,7 +29,7 @@ namespace OS_3_3
 
         public void CreateNew(string comand)
         {
-            Process pr = new Process(comand);
+            Process pr = new (comand);
             processes.Add(pr);
             pr.Start();
         }
@@ -40,17 +38,8 @@ namespace OS_3_3
         {
             while(IsUpdateThreadRunning)
             {
-                GetUpdatedProcessInfo();
                 System.Windows.Application.Current.Dispatcher.Invoke(() => CollectionChanged?.Invoke(this, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset)));
                 Thread.Sleep(UPDATE_TIMEOUT);
-            }
-        }
-
-        private void GetUpdatedProcessInfo()
-        {
-            foreach (var process in processes)
-            {
-                process.UpdateInfo();
             }
         }
 
@@ -63,24 +52,18 @@ namespace OS_3_3
         {
             if (!disposedValue)
             {
-                if (disposing)
-                {
-                    // TODO: освободить управляемое состояние (управляемые объекты)
-                }
                 
                 IsUpdateThreadRunning = false;
-
                 foreach (var process in processes)
                 {
                     process.Dispose();
                 }
-                // TODO: освободить неуправляемые ресурсы (неуправляемые объекты) и переопределить метод завершения
-                // TODO: установить значение NULL для больших полей
+              
                 disposedValue = true;
             }
         }
 
-        // TODO: переопределить метод завершения, только если "Dispose(bool disposing)" содержит код для освобождения неуправляемых ресурсов
+       
         ~ProcessManager()
         {
             // Не изменяйте этот код. Разместите код очистки в методе "Dispose(bool disposing)".
