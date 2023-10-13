@@ -129,12 +129,10 @@ namespace OS_3_3
 
         private void SetAffinityMenuItem_Click(object sender, RoutedEventArgs e)
         {
-            if (!(ProcessInfGrid.SelectedItem is Process selectedProcess)) throw new Exception();
+            if (ProcessInfGrid.SelectedItem is not Process selectedProcess) throw new InvalidOperationException("ProcessInfGrid can contains only Processes");
 
-            object affinityWindow = FormatterServices.GetUninitializedObject(typeof(Processor_affinity));
-            affinityWindow.GetType().GetProperty("Process").SetValue(affinityWindow, selectedProcess);
-            affinityWindow.GetType().GetConstructor(Type.EmptyTypes).Invoke(affinityWindow, null);
-            (affinityWindow as Processor_affinity).ShowDialog();
+            ProcessorAffinityWindow affinityWindow = new(selectedProcess);
+           affinityWindow.ShowDialog();
         }
         #endregion
 
