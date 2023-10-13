@@ -330,7 +330,7 @@ namespace OS_3_3
 
         public void Suspend()
         {
-          //  if (IsSuspended) return;
+            if (IsSuspended) return;
 
             uint[] threadIds = GetThreadIDs();
 
