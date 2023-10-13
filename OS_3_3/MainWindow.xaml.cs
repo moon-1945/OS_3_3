@@ -25,52 +25,33 @@ namespace OS_3_3
     /// </summary>
     public partial class MainWindow : Window
     {
-        const int TIMEOUT = 1000;
-        private readonly ObservableCollection<Process> processes = new();
-        bool isUpdateThreadRunning = true;
+        private readonly ProcessManager processes = new();
+
         public MainWindow()
         {
             InitializeComponent();
             ProcessInfGrid.ItemsSource = processes;
             Closing += OnClosingWindow;
-
-            new Thread(new ThreadStart(() =>
-            {
-                while (isUpdateThreadRunning)
-                {
-                    if (this.IsVisible)
-                    {      
-                        Dispatcher.Invoke(() =>
-                        {
-                            ProcessInfGrid.Items.Refresh();
-                        });
-                    }
-                    Thread.Sleep(TIMEOUT);
-                }
-            })).Start();
         }
 
         private void OnClosingWindow(object? sender, CancelEventArgs e)
         {
-            isUpdateThreadRunning = false;
-            foreach (var process in processes)
-            {
-                process.Dispose();
-            }
+            processes.Dispose();
         }
 
         private void CreateProcessButton_Click(object sender, RoutedEventArgs e)
         {
             if (NotepadRadioButton.IsChecked!.Value)
-                processes.Add(Process.Start("notepad.exe")!);
+                processes.CreateNew("C:\\Program Files\\Notepad++\\notepad++.exe");
             else if (PingRadioButton.IsChecked!.Value)
-                processes.Add(Process.Start("ping")!);//TODO: Set command
+                processes.CreateNew("ping");//TODO: Set command
             else if (SearchRadioButton.IsChecked!.Value)
-                processes.Add(Process.Start("C:\\Users\\User\\Documents\\Telegram Desktop\\Telegram.exe")!);//TODO: Create Search aloritm
+                processes.CreateNew("search.exe");//TODO: Create Search aloritm
             else if (TabulationRadioButton.IsChecked!.Value)
-                processes.Add(Process.Start("tabulation.exe")!);//TODO : put tabl.exe in executing directory
+                processes.CreateNew("tabulation.exe");//TODO : put tabl.exe in executing directory
             
         }
+        #region ContentMenuClickHandlers
         private void SuspendMenuItem_Click(object sender, RoutedEventArgs e)
         {
 
@@ -96,6 +77,7 @@ namespace OS_3_3
             }
         }
 
+        #region PriorityClickHandlers
         private void Realtime_Click(object sender, RoutedEventArgs e)
         {
             if (ProcessInfGrid.SelectedItem is Process selectedProcess)
@@ -143,26 +125,16 @@ namespace OS_3_3
                 selectedProcess.Priority = ProcessPriorityClass.IDLE;
             }
         }
-
-
-        private void SetPriorityMenuItem_Click(object sender, RoutedEventArgs e)
-        {
-
-
-
-        }
-
-
+        #endregion
 
         private void SetAffinityMenuItem_Click(object sender, RoutedEventArgs e)
         {
-            if (!(ProcessInfGrid.SelectedItem is Process selectedProcess)) throw new Exception();
+            if (ProcessInfGrid.SelectedItem is not Process selectedProcess) throw new InvalidOperationException("ProcessInfGrid can contains only Processes");
 
-            object affinityWindow = FormatterServices.GetUninitializedObject(typeof(Processor_affinity));
-            affinityWindow.GetType().GetProperty("Process").SetValue(affinityWindow, selectedProcess);
-            affinityWindow.GetType().GetConstructor(Type.EmptyTypes).Invoke(affinityWindow, null);
-            (affinityWindow as Processor_affinity).ShowDialog();
+            ProcessorAffinityWindow affinityWindow = new(selectedProcess);
+           affinityWindow.ShowDialog();
         }
+        #endregion
 
     }
 }

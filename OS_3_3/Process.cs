@@ -534,7 +534,7 @@ namespace OS_3_3
 
         public void UpdateInfo()
         {
-            throw new NotImplementedException();
+            //throw new NotImplementedException();
         }
 
         protected virtual void Dispose(bool disposing)

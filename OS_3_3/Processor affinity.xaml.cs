@@ -11,31 +11,32 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
-using static OS_3_3.WindowsApi;
 
 namespace OS_3_3
 {
     /// <summary>
     /// Interaction logic for Processor_affinity.xaml
     /// </summary>
-    public partial class Processor_affinity : Window
+    public partial class ProcessorAffinityWindow : Window
     {
-        public uint _coresNumber;
+        private readonly uint _coresNumber;
         public Process Process {get; init;}
 
-        public Processor_affinity()
+        public ProcessorAffinityWindow(Process process)
         {
+            Process = process;
+
             InitializeComponent();
 
-            upLabel.Text = $"Which processors are alowed to run \"{Process.Name}\"";
+            upLabel.Text = $"Which processors are alowed to run \"{Process!.Name}\"";
 
-            _coresNumber = GetCoresNumber();
+            _coresNumber = WindowsApi.GetCoresNumber();
 
             ulong affinityMask = Process.GetAffinityMask();
 
             kernelsCheck.Items.Clear();
 
-            CheckBox allCheck = new CheckBox()
+            CheckBox allCheck = new()
             {
                 Content = $"<All processors>",
             };
@@ -47,28 +48,26 @@ namespace OS_3_3
 
             for (int i = 0; i < _coresNumber; i++)
             {
-                CheckBox affinityCheck = new CheckBox()
+                CheckBox affinityCheck = new()
                 {
                     Content = $"CPU {i}",
-                    IsChecked = ((affinityMask >> i) % 2 == 0) ? false : true,
+                    IsChecked = (affinityMask >> i) % 2 != 0,
                 };
 
                 kernelsCheck.Items.Add(affinityCheck);
             }
-        }
-
-        private uint GetCoresNumber() // я не впевнеений що це має бути у цьому класі ... 
-        {
-            GetSystemInfo(out SYSTEM_INFO systemInfo);
-
-            return systemInfo.dwNumberOfProcessors;
+            //if all processors are alowed to run set  allCheck.IsChecked = true
+            if (affinityMask == (1ul << (int)_coresNumber) - 1)
+            {
+                allCheck.IsChecked = true;
+            }
         }
 
         private void ChangeAllKernelChecks(bool state)
         {
             for (int i = 1; i < kernelsCheck.Items.Count; i++)
             {
-                if (!(kernelsCheck.Items[i] is CheckBox kernelCheck)) throw new Exception();
+                if (kernelsCheck.Items[i] is not CheckBox kernelCheck) continue;
 
                 kernelCheck.IsChecked = state;
             }
@@ -95,7 +94,7 @@ namespace OS_3_3
                 affinityMask |=  (1ul << i); 
             }
 
-            Process.SetAffinityMask(affinityMask);
+            Process!.SetAffinityMask(affinityMask);
 
             Close();
         }

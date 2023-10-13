@@ -103,6 +103,14 @@ namespace OS_3_3
         [DllImport("kernel32.dll", SetLastError = true)]
         public static extern bool GetExitCodeProcess(IntPtr hProcess, out uint lpExitCode);
 
+        public static uint GetCoresNumber() 
+        {
+            GetSystemInfo(out SYSTEM_INFO systemInfo);
+
+            return systemInfo.dwNumberOfProcessors;
+        }
+
+
         [StructLayout(LayoutKind.Sequential)]
         public struct STARTUPINFO
         {
