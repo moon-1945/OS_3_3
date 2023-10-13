@@ -94,7 +94,31 @@ namespace OS_3_3
             }
         }
 
-       
+       public TimeSpan TimeFromCreation
+        {
+            get
+            {
+               
+                GetTimes(out DateTime creationTime, out _, out _, out _);
+                return DateTime.UtcNow.TimeOfDay - creationTime.TimeOfDay;
+            }
+        }
+        public double UserTime
+        {
+            get
+            {
+                GetTimes(out _, out _, out _, out TimeSpan userTime);
+                return userTime.TotalSeconds;
+            }
+        }
+        public double KernelTime
+        {
+            get
+            {
+                GetTimes(out _, out _, out TimeSpan kernelTime, out _);
+                return kernelTime.TotalSeconds;
+            }
+        }
 
         public string Status
         {
