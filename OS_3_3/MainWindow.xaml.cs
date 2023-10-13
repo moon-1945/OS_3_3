@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.Serialization;
@@ -24,8 +25,8 @@ namespace OS_3_3
     /// </summary>
     public partial class MainWindow : Window
     {
-        const int TIMEOUT = 100;
-        private readonly List<Process> processes = new(4);
+        const int TIMEOUT = 1000;
+        private readonly ObservableCollection<Process> processes = new();
         bool isUpdateThreadRunning = true;
         public MainWindow()
         {
@@ -37,10 +38,8 @@ namespace OS_3_3
             {
                 while (isUpdateThreadRunning)
                 {
-                    if (this.IsVisible) // Перевірка видимості вікна
-                    {
-                   //     processes.RemoveAll((e) => e.IsTerminated);
-
+                    if (this.IsVisible)
+                    {      
                         Dispatcher.Invoke(() =>
                         {
                             ProcessInfGrid.Items.Refresh();
@@ -68,8 +67,9 @@ namespace OS_3_3
                 processes.Add(Process.Start("ping")!);//TODO: Set command
             else if (SearchRadioButton.IsChecked!.Value)
                 processes.Add(Process.Start("search.exe")!);//TODO: Create Search aloritm
-            else if (TabulationRadioButton.IsChecked.HasValue)
+            else if (TabulationRadioButton.IsChecked!.Value)
                 processes.Add(Process.Start("tabulation.exe")!);//TODO : put tabl.exe in executing directory
+            
         }
         private void SuspendMenuItem_Click(object sender, RoutedEventArgs e)
         {
@@ -147,6 +147,8 @@ namespace OS_3_3
 
         private void SetPriorityMenuItem_Click(object sender, RoutedEventArgs e)
         {
+
+
 
         }
 

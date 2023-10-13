@@ -90,14 +90,14 @@ namespace OS_3_3
                 return builder.ToString();
             }
         }
-        public bool IsTerminated => (WaitForSingleObject(_handle, 0) == 0) ? true : false;
+        private bool IsTerminated => (WaitForSingleObject(_handle, 0) == 0) ? true : false;
 
         private int _num = 0;
 
         private uint _mainThreadId = 0;
         private bool disposedValue;
 
-        public bool IsSuspended
+        private bool IsSuspended
         {
             get
             {
@@ -127,27 +127,27 @@ namespace OS_3_3
             }
         }
 
-        //public bool IsRunning
-        //{
-        //    get
-        //    {
-        //        if (!GetExitCodeProcess(_handle, out uint code)) throw new InvalidOperationException();
+        private bool IsRunning
+        {
+            get
+            {
+                if (!GetExitCodeProcess(_handle, out uint code)) throw new InvalidOperationException();
 
-        //        if (IsSuspended) return false; // незн без цього не працює норм ...
+                if (IsSuspended) return false; // незн без цього не працює норм ...
 
-        //        return code == 259;
-        //    }
-        //}
+                return code == 259;
+            }
+        }
 
-        //public string Status
-        //{
-        //    get
-        //    {
-        //        if (IsTerminated) return "Terminated";
-        //        if (IsSuspended) return "Suspended";
-        //        return "Running";
-        //    }
-        //}
+        public string Status
+        {
+            get
+            {
+                if (IsTerminated) return "Terminated";
+                if (IsSuspended) return "Suspended";
+                return "Running";
+            }
+        }
 
         public Process(string commandLine)
         {
@@ -434,7 +434,7 @@ namespace OS_3_3
         public void Kill()
         {
             TerminateProcess(_handle, 1);
-            //close handle???
+            
         }
 
         public static void Kill(uint id)
