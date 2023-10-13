@@ -66,7 +66,7 @@ namespace OS_3_3
             else if (PingRadioButton.IsChecked!.Value)
                 processes.Add(Process.Start("ping")!);//TODO: Set command
             else if (SearchRadioButton.IsChecked!.Value)
-                processes.Add(Process.Start("search.exe")!);//TODO: Create Search aloritm
+                processes.Add(Process.Start("C:\\Users\\User\\Documents\\Telegram Desktop\\Telegram.exe")!);//TODO: Create Search aloritm
             else if (TabulationRadioButton.IsChecked!.Value)
                 processes.Add(Process.Start("tabulation.exe")!);//TODO : put tabl.exe in executing directory
             
