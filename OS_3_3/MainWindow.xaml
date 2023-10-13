@@ -19,7 +19,7 @@
                     <MenuItem Header="Resume" Click="ResumeMenuItem_Click"/>
                     <MenuItem Header="Terminate" Click="TerminateMenuItem_Click"/>
                     <Separator/>
-                    <MenuItem Header="Set Priority" Click="SetPriorityMenuItem_Click">
+                    <MenuItem Header="Set Priority" >
                         <MenuItem Header="Realtime" Click="Realtime_Click"/>
                         <MenuItem Header="High" Click="High_Click"/>
                         <MenuItem Header="Above normal" Click="AboveNormal_Click"/>

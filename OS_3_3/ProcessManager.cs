@@ -5,20 +5,19 @@ using System.Collections.Specialized;
 using System.Linq;
 using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace OS_3_3
 {
-    internal class ProsecManager : IEnumerable<Process>,INotifyCollectionChanged,IDisposable
+    internal class ProcessManager : IEnumerable<Process>,INotifyCollectionChanged,IDisposable
     {
         private readonly List<Process> processes = new(4);
         private bool disposedValue;
         private bool IsUpdateThreadRunning = true;
-        private const int UPDATE_TIMEOUT = 100;
+        private const int UPDATE_TIMEOUT = 1000;
 
         public event NotifyCollectionChangedEventHandler? CollectionChanged;
 
-        public ProsecManager() 
+        public ProcessManager() 
         {
             ThreadStart threadStart = new ThreadStart(UpDatingThread);
             Thread thread = new Thread(threadStart);
@@ -30,12 +29,19 @@ namespace OS_3_3
             return processes.GetEnumerator();
         }
 
+        public void CreateNew(string comand)
+        {
+            Process pr = new Process(comand);
+            processes.Add(pr);
+            pr.Start();
+        }
+
         private void UpDatingThread()
         {
             while(IsUpdateThreadRunning)
             {
                 GetUpdatedProcessInfo();
-                CollectionChanged?.Invoke(this, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
+                System.Windows.Application.Current.Dispatcher.Invoke(() => CollectionChanged?.Invoke(this, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset)));
                 Thread.Sleep(UPDATE_TIMEOUT);
             }
         }
@@ -75,7 +81,7 @@ namespace OS_3_3
         }
 
         // TODO: переопределить метод завершения, только если "Dispose(bool disposing)" содержит код для освобождения неуправляемых ресурсов
-        ~ProsecManager()
+        ~ProcessManager()
         {
             // Не изменяйте этот код. Разместите код очистки в методе "Dispose(bool disposing)".
             Dispose(disposing: false);
