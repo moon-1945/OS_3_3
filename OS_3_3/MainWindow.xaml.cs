@@ -62,7 +62,7 @@ namespace OS_3_3
         private void CreateProcessButton_Click(object sender, RoutedEventArgs e)
         {
             if (NotepadRadioButton.IsChecked!.Value)
-                processes.Add(Process.Start("notepad.exe")!);
+                processes.Add(Process.Start("C:\\Program Files\\Notepad++\\notepad++.exe")!);
             else if (PingRadioButton.IsChecked!.Value)
                 processes.Add(Process.Start("ping")!);//TODO: Set command
             else if (SearchRadioButton.IsChecked!.Value)
